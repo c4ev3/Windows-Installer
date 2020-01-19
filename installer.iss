@@ -1,8 +1,8 @@
-#define MyJarPluginBasename "de.h-ab.ev3plugin"
-#define MyJarPlugin "de.h-ab.ev3plugin_1.7.2.201908011455.jar"
-#define MyGCCInstaller "arm-2009q1-203-arm-none-linux-gnueabi.exe"
-#define BuildDir "D:\build"
-;#define TOOLCHAIN_INCLUDED
+; Leave these in as they are overridden from Makefile
+#define JAR_PLUGIN_BASENAME     "de.h-ab.ev3plugin"
+#define JAR_PLUGIN              "de.h-ab.ev3plugin_1.7.2.201908011455.jar"
+;#define GCC_INSTALLER          "arm-2009q1-203-arm-none-linux-gnueabi.exe"
+
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application.
 ; Do not use the same AppId value in installers for other applications.
@@ -19,28 +19,28 @@ DefaultDirName=C:\ev3
 DisableDirPage=yes
 DefaultGroupName=c4ev3
 AllowNoIcons=yes
-#ifdef TOOLCHAIN_INCLUDED
+Compression=lzma
+SolidCompression=yes
+#ifdef GCC_INSTALLER
 OutputBaseFilename=c4ev3-withGCC-setup
 #else
 OutputBaseFilename=c4ev3-setup
 #endif
-Compression=lzma
-SolidCompression=yes
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Files]
 ; Toolchain
-#ifdef TOOLCHAIN_INCLUDED
-Source: "{#BuildDir}\{#MyGCCInstaller}"; DestDir: "{app}"; AfterInstall: InstallToolchain
+#ifdef GCC_INSTALLER
+Source: "{#GCC_INSTALLER}"; DestDir: "{app}"; AfterInstall: InstallToolchain
 #endif
 ; API
-Source: "{#BuildDir}\API\*"; DestDir: "{app}\API"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "artifacts\API\*"; DestDir: "{app}\API"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; Uploader
-Source: "{#BuildDir}\uploader\*"; DestDir: "{app}\uploader"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "artifacts\ev3duder\*"; DestDir: "{app}\uploader"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; Plugin
-Source: "{#BuildDir}\{#MyJarPlugin}"; DestDir: "{app}"; AfterInstall: InstallPlugin
+Source: "artifacts\{#JAR_PLUGIN}"; DestDir: "{app}"; AfterInstall: InstallPlugin
 
 [InstallDelete]
 Type: filesandordirs; Name: "{app}\API"
@@ -55,16 +55,18 @@ begin
   setPreviousData(PreviousDataKey, 'EclipseDir', EclipseDirectory);
 end;
 
+#ifdef GCC_INSTALLER
 procedure InstallToolchain;
 var
   ResultCode: Integer;
 begin
-  if not Exec(ExpandConstant('{app}\{#MyGCCInstaller}'),'', '', SW_SHOWNORMAL,
+  if not Exec(ExpandConstant('{app}\{#GCC_INSTALLER}'),'', '', SW_SHOWNORMAL,
               ewWaitUntilTerminated, ResultCode)
   then
       MsgBox('Failed to install toolchain!' + #13#10 +
              SysErrorMessage(ResultCode), mbError, MB_OK);
 end;
+#endif
 
 procedure InstallPlugin;
 var
@@ -89,15 +91,15 @@ begin
   else
       EclipseDirectory := directory;
 
-      DelTree(directory + ExpandConstant('\dropins\{#MyJarPluginBasename}*.jar'), False, True, True);
+      DelTree(directory + ExpandConstant('\dropins\{#JAR_PLUGIN_BASENAME}*.jar'), False, True, True);
 
-      FileCopy(ExpandConstant('{app}\{#MyJarPlugin}'),
-               directory + ExpandConstant('\dropins\{#MyJarPlugin}'), false);
+      FileCopy(ExpandConstant('{app}\{#JAR_PLUGIN}'),
+               directory + ExpandConstant('\dropins\{#JAR_PLUGIN}'), false);
 end;
 
 procedure UninstallPlugin;
 begin
-    DeleteFile(EclipseDirectory + ExpandConstant('\dropins\{#MyJarPlugin}'));
+    DeleteFile(EclipseDirectory + ExpandConstant('\dropins\{#JAR_PLUGIN}'));
 end;
 
 function InitializeUninstall: Boolean;
