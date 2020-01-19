@@ -1,11 +1,18 @@
-# Installer
-Installation wizard for the c4ev3 on Windows
+# Installer [![https://ci.appveyor.com/api/projects/status/github/c4ev3/Windows-Installer?svg=true](https://ci.appveyor.com/api/projects/status/github/c4ev3/Windows-Installer?svg=true)](https://ci.appveyor.com/project/c4ev3/Windows-Installer)
+
+Installation wizard for c4ev3 on Windows
 
 ## How to generate an Installer
-[Download Innosetup](http://www.jrsoftware.org/isdl.php). Install it together with the bundled preprocessor. Double click the script and compile from the Menu _Build_. By default, the Installer fetches the files from `D:\ev3\` directory. Specifics are in the ini-category `[Files]`.
+Checkout the repository including all submodules:
+```
+git checkout --recursive https://github.com/c4ev3/Windows-Installer.git
+```
 
-Depending on whether you want the toolchain included, comment or uncomment the
-`#define TOOLCHAIN_INCLUDED`
-line. Uncommenting is done, as usual for `.ini`s with the `;` character.
+[Download Innosetup](http://www.jrsoftware.org/isdl.php) and Install it together with the bundled preprocessor.
 
-A fully Makefile would be neat though.. (The fork button is to the upper right!)
+Build the installer using the `Makefile`:
+
+```
+make c4ev3-setup.exe
+make c4ev3-withGCC-setup.exe # for building with toolchain
+```
