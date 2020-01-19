@@ -1,0 +1,54 @@
+#os: Visual Studio 2015
+
+clone_depth: 5
+
+cache:
+  - C:\ProgramData\chocolatey\bin -> appveyor.yml
+  - C:\ProgramData\chocolatey\lib -> appveyor.yml
+  - C:\mingw64
+
+environment:
+  matrix:
+    - compiler: mingw
+  TOOLCHAIN_URL: https://sourcery.mentor.com/GNUToolchain/package4574/public/arm-none-linux-gnueabi/arm-2009q1-203-arm-none-linux-gnueabi.exe
+  TOOLCHAIN_PATH: C:\Program Files (x86)\CodeSourcery\Sourcery G++ Lite\bin
+  CROSS_COMPILE: arm-none-linux-gnueabi-
+  GCC_INSTALLER: toolchain.exe
+  CC: gcc
+
+init:
+  - set PATH=C:\Program Files (x86)\Git\usr\bin;C:\Program Files\Git\usr\bin;%PATH%
+  - set PATH=%TOOLCHAIN_PATH%;C:\mingw64\bin;%PATH%
+
+install:
+  - ps: |
+      if (-Not (Test-Path "C:\mingw64")) {
+        # Install MinGW.
+        $file = "x86_64-4.9.2-release-win32-seh-rt_v4-rev3.7z"
+        wget https://bintray.com/artifact/download/drewwells/generic/$file -OutFile $file
+        &7z x -oC:\ $file > $null
+      }
+  - git submodule update --init --recursive
+  - choco install --no-progress innosetup
+  - appveyor DownloadFile %TOOLCHAIN_URL% -FileName toolchain.exe
+  - toolchain.exe -i silent
+
+before_build:
+  - bash -c '%CROSS_COMPILE%gcc -v'
+
+build_script:
+  - bash -c 'mingw32-make c4ev3-setup.exe c4ev3-withGCC-setup.exe'
+
+artifacts:
+  - path: 'Output/c4ev3*-setup.exe'
+
+deploy:
+  - provider: GitHub
+    auth_token:
+      secure: QShqgNb0QyEt0sRhlRTij79PtE+vWcOpJUPgos/tDTHUn6Hs2A3218if5qhALTIU
+    artifact: /c4ev3.*-setup\.exe/
+    draft: false
+    prerelease: false
+    force_update: true
+    on:
+      appveyor_repo_tag: true        # deploy on tag push only
