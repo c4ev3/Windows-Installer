@@ -9,7 +9,7 @@
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
 AppId={{860CEFBC-72B1-44B3-B725-CCC165E1347B}
 AppName=c4ev3
-AppVersion=1.0
+AppVersion=v2020.01.0
 ;AppVerName=c4ev3 1.0
 AppPublisher=Embedded Systems Lab, Hochschule Aschaffenburg
 AppPublisherURL=http://c4ev3.github.io
